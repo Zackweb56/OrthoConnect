@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+
+:root {
+  color-scheme: light;
+  --primary: #22223b;
+  --primary-hover: #40406f;
+  --primary-fg: #f2e9e4;
+  --text: #22223b;
+  --text-muted: #4a4e69;
+  --bg: #f2e9e4;
+  --surface: #fcfaf9;
+  --surface-soft: #f7f1ee;
+  --border: #c9ada7;
+  --accent: #9a8c98;
+  --accent-2: #c9ada7;
+  --ring: #6060a3;
+  --success: #195e56;
+  --warning: #755912;
+  --danger: #a43316;
+  --radius: 0.75rem;
+}
+
+.family-theme {
+  --primary: #217e73;
+  --primary-hover: #195e56;
+  --primary-fg: #ffffff;
+  --text: #264653;
+  --text-muted: #1f3943;
+  --bg: #faf3e1;
+  --surface: #ffffff;
+  --surface-soft: #f6e7c3;
+  --border: #f8c8a1;
+  --accent: #e76f51;
+  --accent-2: #e9c46a;
+  --ring: #2a9d8f;
+  --success: #195e56;
+  --warning: #755912;
+  --danger: #a43316;
+  --radius: 1.25rem;
+}
+
+@theme inline {
+  --color-canvas: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-fg: var(--text);
+  --color-muted: var(--text-muted);
+  --color-line: var(--border);
+  --color-ring: var(--ring);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-input: var(--border);
+  --font-sans: var(--font-primary), var(--font-arabic), system-ui, sans-serif;
+  --font-handwriting: var(--font-notes), cursive;
+}
+
+* {
+  border-color: color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-primary), var(--font-arabic), system-ui, sans-serif;
+}
+
+.notes-font {
+  font-family: var(--font-notes), cursive;
+}
+
+.arabic-text {
+  direction: rtl;
+  font-family: var(--font-arabic), var(--font-primary), sans-serif;
+  unicode-bidi: isolate;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
