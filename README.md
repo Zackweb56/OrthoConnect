@@ -571,35 +571,70 @@ réel.
 
 ## 8. Identité visuelle et UX
 
-### Direction visuelle provisoire
+### Palettes validées pour le MVP
 
-Le nom et le logo ne sont pas encore décidés. L'identité proposée
-ci-dessous est un point de départ à valider, et ne doit pas être
-considérée comme une décision de marque finale.
+Les deux palettes ci-dessous sont fournies par le fondateur. La palette
+Professional est appliquée par défaut ; Family est activée avec
+`.family-theme`. Les échelles complètes sont aussi enregistrées dans
+`tailwind.config.js`.
 
-  Token           Couleur     Usage
-  --------------- ----------- ---------------------------------------------
-  Primary         `#5266B8`   Actions principales, liens, éléments actifs
-  Primary dark    `#3D4E96`   Hover et états accentués
-  Text            `#263047`   Texte principal
-  Background      `#F7F8FC`   Fond général
-  Surface         `#FFFFFF`   Cartes et panneaux
-  Soft lavender   `#EEF0FF`   Fonds doux et éléments secondaires
-  Soft mint       `#E4F4EF`   Indications positives
-  Border          `#E4E7EF`   Bordures
-  Muted           `#697386`   Texte secondaire
-  Success         `#25856D`   Succès
-  Warning         `#C58A2C`   Avertissements
-  Danger          `#C65353`   Erreurs et actions destructives
+#### Professional — Platform Owner, Cabinet, authentification et public
 
-### Typographie proposée
+| Échelle | 100 | 200 | 300 | 400 | 500 / défaut | 600 | 700 | 800 | 900 |
+|---|---|---|---|---|---|---|---|---|---|
+| `space_indigo` | `#07070c` | `#0d0d17` | `#141423` | `#1b1b2f` | `#22223b` | `#40406f` | `#6060a3` | `#9595c2` | `#cacae0` |
+| `dusty_grape` | `#0f1015` | `#1e1f2a` | `#2c2f3f` | `#3b3e54` | `#4a4e69` | `#666b8f` | `#8b8fac` | `#b1b4c8` | `#d8dae3` |
+| `lilac_ash` | `#1f1c1f` | `#3f383e` | `#5e535c` | `#7d6f7b` | `#9a8c98` | `#aea4ad` | `#c3bbc1` | `#d7d2d6` | `#ebe8ea` |
+| `almond_silk` | `#2e1f1c` | `#5b3e38` | `#895d54` | `#ad8279` | `#c9ada7` | `#d4bdb8` | `#dececa` | `#e9dedc` | `#f4efed` |
+| `parchment` | `#3f2a1e` | `#7f543d` | `#b58165` | `#d3b5a4` | `#f2e9e4` | `#f4ede9` | `#f7f1ee` | `#faf6f4` | `#fcfaf9` |
 
--   Français / Latin : **Inter**.
--   Arabe : **IBM Plex Sans Arabic**.
--   Utiliser `next/font/google` si les polices sont disponibles et
-    compatibles avec la stratégie de déploiement ; sinon choisir une
-    solution locale.
--   Vérifier la lisibilité sur mobile et les tailles de texte en arabe.
+| Jeton sémantique | Valeur | Usage |
+|---|---|---|
+| `--primary` / `--primary-hover` | `#22223b` / `#40406f` | Actions / survol |
+| `--primary-fg` | `#f2e9e4` | Texte sur l'action primaire |
+| `--text` / `--text-muted` | `#22223b` / `#4a4e69` | Texte principal / secondaire |
+| `--bg` / `--surface` / `--surface-soft` | `#f2e9e4` / `#fcfaf9` / `#f7f1ee` | Fond / carte / surface douce |
+| `--border` / `--accent` / `--ring` | `#c9ada7` / `#9a8c98` / `#6060a3` | Bordure / décoration / focus |
+| `--success` / `--warning` / `--danger` | `#195e56` / `#755912` / `#a43316` | États accessibles sur parchment |
+| `--radius` | `0.75rem` | Rayon par défaut |
+
+#### Family — portail Famille et connexion famille
+
+| Échelle | 100 | 200 | 300 | 400 | 500 / défaut | 600 | 700 | 800 | 900 |
+|---|---|---|---|---|---|---|---|---|---|
+| `charcoal_blue` | `#080e11` | `#0f1c22` | `#172b32` | `#1f3943` | `#264653` | `#3f7489` | `#609db6` | `#95bece` | `#cadee7` |
+| `verdigris` | `#081f1d` | `#113f39` | `#195e56` | `#217e73` | `#2a9d8f` | `#3acbba` | `#6cd8cb` | `#9de5dc` | `#cef2ee` |
+| `tuscan_sun` | `#3b2c09` | `#755912` | `#b0851a` | `#e0ad2e` | `#e9c46a` | `#edd086` | `#f1dca4` | `#f6e7c3` | `#faf3e1` |
+| `sandy_brown` | `#401f04` | `#803e09` | `#c05e0d` | `#f07e22` | `#f4a261` | `#f6b681` | `#f8c8a1` | `#fbdac0` | `#fdede0` |
+| `burnt_peach` | `#371107` | `#6e220f` | `#a43316` | `#db441e` | `#e76f51` | `#ec8b73` | `#f1a896` | `#f5c5b9` | `#fae2dc` |
+
+| Jeton sémantique | Valeur | Usage |
+|---|---|---|
+| `--primary` / `--primary-hover` | `#217e73` / `#195e56` | Actions / survol, texte blanc |
+| `--primary-fg` | `#ffffff` | Texte sur l'action primaire |
+| `--text` / `--text-muted` | `#264653` / `#1f3943` | Texte principal / secondaire |
+| `--bg` / `--surface` / `--surface-soft` | `#faf3e1` / `#ffffff` / `#f6e7c3` | Fond / carte / surface douce |
+| `--border` / `--accent` / `--accent-2` / `--ring` | `#f8c8a1` / `#e76f51` / `#e9c46a` / `#2a9d8f` | Bordure / décoration / badge / focus |
+| `--success` / `--warning` / `--danger` | `#195e56` / `#755912` / `#a43316` | États accessibles sur Tuscan Sun 900 |
+| `--radius` | `1.25rem` | Rayon plus généreux |
+
+Les contrastes des couleurs de statut sont supérieurs à 4.5:1 sur le fond
+de leur palette. Pour Family, le primaire `#217e73` donne 4.89:1 avec du
+texte blanc sur surface blanche. Les valeurs et noms des alias Tailwind
+sont détaillés dans `docs/decisions/0001-color-palettes.md`.
+
+### Typographie
+
+-   Police principale : **Winky Sans**.
+-   Notes manuscrites : **Playwrite HU**.
+-   Traductions arabes : **Playpen Sans Arabic**.
+-   Les polices sont servies localement via `next/font/google`.
+-   Le texte arabe utilise la classe `.arabic-text` pour la police et la
+    direction RTL locales ; l'application reste `lang="fr"` et `dir="ltr"`
+    jusqu'à la phase i18n.
+-   Les composants de base utilisent shadcn/ui avec Radix. Le registre
+    actuel ne distribuant plus `toast`, le composant Toast local s'appuie
+    directement sur la primitive Radix correspondante.
 
 ### Principes UX
 
