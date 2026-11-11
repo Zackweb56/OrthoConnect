@@ -1,0 +1,107 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== Owner Dashboard Models ==========
+// All models follow the agreed fields, table names are snake_case, Prisma will auto-map
+
+model User {
+  id               String    @id @default(cuid())
+  name             String
+  email            String?   @unique
+  phone            String?   @unique
+  password         String
+  isPlatformOwner  Boolean   @default(false) @map("is_platform_owner")
+  emailVerifiedAt  DateTime? @map("email_verified_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations (to be added later: clinicUser, responsible)
+  @@map("users")
+}
+
+model Clinic {
+  id           String    @id @default(cuid())
+  name         String
+  slug         String    @unique
+  logoPath     String?   @map("logo_path")
+  phone        String?
+  email        String?
+  address      String?
+  city         String?
+  timezone     String    @default("Africa/Casablanca")
+  openingHours Json?     @map("opening_hours")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  subscriptions Subscription[]
+  payments      Payment[]
+
+  @@map("clinics")
+}
+
+model Plan {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  price           Decimal  @db.Decimal(10, 2)
+  billingInterval String   @map("billing_interval") // 'monthly' | 'yearly'
+  trialDays       Int      @default(0) @map("trial_days")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id            String    @id @default(cuid())
+  clinicId      String    @map("clinic_id")
+  planId        String    @map("plan_id")
+  status        String    // 'trialing' | 'active' | 'past_due' | 'cancelled' | 'expired'
+  startsAt      DateTime? @map("starts_at")
+  endsAt        DateTime? @map("ends_at")
+  trialEndsAt   DateTime? @map("trial_ends_at")
+  cancelledAt   DateTime? @map("cancelled_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  clinic  Clinic   @relation(fields: [clinicId], references: [id])
+  plan    Plan     @relation(fields: [planId], references: [id])
+  payments Payment[]
+
+  @@map("subscriptions")
+}
+
+model Payment {
+  id              String    @id @default(cuid())
+  clinicId        String    @map("clinic_id")
+  subscriptionId  String    @map("subscription_id")
+  amount          Decimal   @db.Decimal(10, 2)
+  currency        String    @default("MAD")
+  status          String    // 'pending' | 'completed' | 'failed' | 'refunded'
+  method          String    // 'cash' | 'bank_transfer' | 'card'
+  reference       String?
+  paidAt          DateTime? @map("paid_at")
+  periodStartsAt  DateTime? @map("period_starts_at")
+  periodEndsAt    DateTime? @map("period_ends_at")
+  recordedBy      String    @map("recorded_by") // Platform Owner User id
+  notes           String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  clinic       Clinic       @relation(fields: [clinicId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@map("payments")
+}
