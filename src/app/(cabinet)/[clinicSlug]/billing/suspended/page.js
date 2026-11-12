@@ -180,11 +180,11 @@ export default async function BillingSuspendedPage({ params, searchParams }) {
             className="shrink-0"
           >
             <Image
-                src="/assets/images/brand_logo.png"
+              src="/assets/images/brand_logo.png"
               alt="OrthoConnect"
               width={160}
               height={32}
-              className="h-7 w-auto sm:h-8"
+              className="h-20 w-auto sm:h-25"
               priority
             />
           </Link>

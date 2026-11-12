@@ -17,5 +17,9 @@ export default auth((request) => {
 });
 
 export const config = {
-  matcher: ["/owner/:path*", "/dashboard/:path*"],
+  matcher: [
+    "/owner/:path*",
+    "/:clinicSlug/dashboard/:path*",
+    "/:clinicSlug/billing/:path*",
+  ],
 };
