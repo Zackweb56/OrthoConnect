@@ -18,6 +18,7 @@
   --success: #195e56;
   --warning: #755912;
   --danger: #a43316;
+  --info: #315d8a;
   --radius: 0.75rem;
 }
 
@@ -37,6 +38,7 @@
   --success: #195e56;
   --warning: #755912;
   --danger: #a43316;
+  --info: #315d8a;
   --radius: 1.25rem;
 }
 
@@ -56,6 +58,7 @@
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-info: var(--info);
   --color-background: var(--bg);
   --color-foreground: var(--text);
   --color-card: var(--surface);
@@ -95,4 +98,27 @@ body {
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+:where(
+  button:not(:disabled),
+  a[href],
+  [role="button"]:not([aria-disabled="true"]),
+  [role="switch"]:not([aria-disabled="true"]),
+  [role="menuitem"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  label[for]
+) {
+  cursor: pointer;
+}
+
+:where(button:disabled) {
+  cursor: not-allowed;
+}
+
+a[aria-disabled="true"],
+[data-disabled="true"] {
+  cursor: not-allowed;
 }

@@ -1,9 +1,8 @@
 export const ownerNav = [
-  { label: "Dashboard", href: "/admin/dashboard", icon: "LayoutDashboard" },
-  { label: "Clinics", href: "/admin/clinics", icon: "Building2" },
-  { label: "Plans", href: "/admin/plans", icon: "ClipboardList" },
-  { label: "Subscriptions", href: "/admin/subscriptions", icon: "CreditCard" },
-  { label: "Payments", href: "/admin/payments", icon: "Wallet" },
+  { label: "Tableau de bord", href: "/owner/dashboard", icon: "LayoutDashboard" },
+  { label: "Cabinets", href: "/owner/clinics", icon: "Building2" },
+  { label: "Plans", href: "/owner/plans", icon: "ClipboardList" },
+  { label: "Paiements", href: "/owner/payments", icon: "Wallet" },
 ];
 
 export const cabinetNav = [

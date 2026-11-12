@@ -20,11 +20,11 @@ export function AuthShell({ children, variant = PALETTES.PRO }) {
           aria-label="OrthoConnect home"
         >
           <Image
-            src="/images/logo.svg"
+            src="/assets/images/brand_logo.png"
             alt="OrthoConnect"
             width={200}
             height={40}
-            className="h-10 w-auto"
+            className="h-30 w-auto"
             style={{ width: "auto" }}
           />
         </Link>

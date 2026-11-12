@@ -1,12 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function CabinetDashboardPage() {
+export default function ClinicDashboardPage() {
   return (
     <section className="space-y-6">
       <div className="space-y-2">
         <Badge variant="outline">Phase 2</Badge>
-        <h2 className="text-2xl font-semibold">Dashboard</h2>
+        <h2 className="text-xl font-semibold sm:text-2xl">Tableau de bord</h2>
         <p className="text-muted">
           Votre espace de travail — le contenu métier sera ajouté plus tard.
         </p>

@@ -18,25 +18,32 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { SignOutItem } from "@/components/layouts/sign-out-item";
+import { ToastViewport } from "@/components/owner/shared";
 import { cn } from "cn";
 
-export function ProShell({ nav, title, children }) {
+export function ProShell({ nav, title, user, children }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const themeClass = resolveThemeClass(PALETTES.PRO);
+  const initials = (user?.name || user?.email || "OC")
+    .split(/[\s@]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0].toUpperCase())
+    .join("");
 
   return (
     <div className={cn(themeClass, "flex min-h-screen bg-canvas text-fg")}>
       {isMobileMenuOpen && (
         <button
           type="button"
-          aria-label="Close navigation menu"
+          aria-label="Fermer le menu de navigation"
           className="fixed inset-0 z-40 bg-black/30 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -52,16 +59,20 @@ export function ProShell({ nav, title, children }) {
           <Link
             href="/"
             className="flex min-w-0 items-center"
-            aria-label="OrthoConnect home"
+            aria-label="Accueil OrthoConnect"
+            title="Accueil OrthoConnect"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             {isCollapsed ? (
-              <span className="grid size-10 place-items-center rounded-lg bg-primary text-sm font-bold text-primary-fg md:grid">
-                OC
-              </span>
+              <Image
+                src="/assets/images/logo.png"
+                alt="OrthoConnect"
+                width={44}
+                height={44}
+              />
             ) : (
               <Image
-                src="/images/logo.svg"
+                src="/assets/images/brand_logo.png"
                 alt="OrthoConnect"
                 width={220}
                 height={44}
@@ -73,7 +84,7 @@ export function ProShell({ nav, title, children }) {
             variant="ghost"
             size="icon"
             className="hidden md:inline-flex"
-            aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={isCollapsed ? "Développer le menu" : "Réduire le menu"}
             aria-expanded={!isCollapsed}
             onClick={() => setIsCollapsed((collapsed) => !collapsed)}
           >
@@ -88,14 +99,14 @@ export function ProShell({ nav, title, children }) {
             variant="ghost"
             size="icon"
             className="md:hidden"
-            aria-label="Close navigation menu"
+            aria-label="Fermer le menu de navigation"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <X aria-hidden="true" />
           </Button>
         </div>
         <Separator />
-        <nav aria-label="Main navigation" className="flex-1 overflow-y-auto p-3">
+        <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto p-3">
           <ul className="space-y-1">
             {nav.map((item) => {
               const Icon = getNavigationIcon(item.icon);
@@ -108,7 +119,7 @@ export function ProShell({ nav, title, children }) {
                     href={item.href}
                     aria-current={isActive ? "page" : undefined}
                     aria-label={isCollapsed ? item.label : undefined}
-                    title={isCollapsed ? item.label : undefined}
+                    title={item.label}
                     className={cn(
                       "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       isActive
@@ -135,7 +146,7 @@ export function ProShell({ nav, title, children }) {
               isCollapsed && "md:sr-only",
             )}
           >
-            Espace professionnel
+            Espace propriétaire
           </p>
         </div>
       </aside>
@@ -148,7 +159,7 @@ export function ProShell({ nav, title, children }) {
               variant="outline"
               size="icon"
               className="md:hidden"
-              aria-label="Open navigation menu"
+              aria-label="Ouvrir le menu de navigation"
               aria-expanded={isMobileMenuOpen}
               onClick={() => setIsMobileMenuOpen(true)}
             >
@@ -158,7 +169,7 @@ export function ProShell({ nav, title, children }) {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <div
-              aria-label="Language switcher placeholder"
+              aria-label="Sélecteur de langue"
               className="hidden items-center gap-1 sm:flex"
             >
               <Button type="button" variant="ghost" size="sm" disabled>
@@ -174,28 +185,40 @@ export function ProShell({ nav, title, children }) {
                   type="button"
                   variant="ghost"
                   className="gap-2 px-2"
-                  aria-label="Open account menu"
+                  aria-label="Ouvrir le menu du compte"
                 >
                   <Avatar>
-                    <AvatarFallback>OC</AvatarFallback>
+                    <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:inline">Compte</span>
+                  <span className="hidden max-w-36 truncate text-start sm:inline">
+                    {user?.name || user?.email || "Compte"}
+                  </span>
                   <ChevronDown className="size-4" aria-hidden="true" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Compte</DropdownMenuLabel>
-                <DropdownMenuItem disabled>Menu de compte à venir</DropdownMenuItem>
+                <DropdownMenuLabel>
+                  <span className="block text-sm font-semibold text-fg">
+                    {user?.name || "Utilisateur"}
+                  </span>
+                  {user?.email && (
+                    <span className="block max-w-60 truncate text-xs font-normal">
+                      {user.email}
+                    </span>
+                  )}
+                </DropdownMenuLabel>
+                <SignOutItem />
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
         <main className="w-full flex-1 bg-canvas">
-          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
             {children}
           </div>
         </main>
       </div>
+      <ToastViewport />
     </div>
   );
 }

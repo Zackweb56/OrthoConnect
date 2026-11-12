@@ -32,7 +32,7 @@ export function FamilyShell({ children }) {
       <header className="flex min-h-16 items-center justify-between gap-4 border-b border-line bg-surface px-4 sm:px-6">
         <Link href="/home" aria-label="OrthoConnect family home">
           <Image
-            src="/images/logo.svg"
+              src="/assets/images/brand_logo.png"
             alt="OrthoConnect"
             width={220}
             height={44}
