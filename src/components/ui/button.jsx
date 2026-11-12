@@ -45,18 +45,38 @@ function Button({
   variant = "default",
   size = "default",
   asChild = false,
+  title,
   ...props
 }) {
   const Comp = asChild ? Slot.Root : "button"
+  const tooltipTitle =
+    title ?? props["aria-label"] ?? getTextContent(props.children);
 
   return (
     <Comp
       data-slot="button"
       data-variant={variant}
       data-size={size}
+      title={tooltipTitle || undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props} />
   );
+}
+
+function getTextContent(children) {
+  return React.Children.toArray(children)
+    .map((child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        return String(child);
+      }
+      return React.isValidElement(child)
+        ? getTextContent(child.props.children)
+        : "";
+    })
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export { Button, buttonVariants }

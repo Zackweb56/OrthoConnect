@@ -996,3 +996,41 @@ fondateur avant toute migration.
 
 **Prochaine étape :** créer le repository et initialiser proprement le
 projet en suivant le guide Git.
+
+------------------------------------------------------------------------
+
+## 15. Authentification et espace Platform Owner
+
+L'authentification Platform Owner utilise Auth.js avec une session JWT.
+Configurer les variables suivantes dans l'environnement local ou de
+déploiement, sans les commiter :
+
+- `DATABASE_URL`
+- `AUTH_SECRET` (secret aléatoire fort pour signer les sessions)
+- `PLATFORM_OWNER_NAME`
+- `PLATFORM_OWNER_EMAIL`
+- `PLATFORM_OWNER_PASSWORD` (au moins 12 caractères)
+
+Pour le développement local, copier `.env.example` en `.env`, puis
+remplacer l'URL de base de données, `AUTH_SECRET` et le mot de passe
+d'exemple par vos propres valeurs. Les identifiants de `.env.example`
+sont uniquement des exemples : ne pas les utiliser en production.
+
+Après configuration de la base :
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+npx prisma db seed # crée le compte Platform Owner depuis les variables PLATFORM_OWNER_*
+npm run dev
+```
+
+Connectez-vous sur `/login` avec `PLATFORM_OWNER_EMAIL` et
+`PLATFORM_OWNER_PASSWORD`. Le seed crée le compte s'il n'existe pas ;
+sinon, il ne change pas le mot de passe existant.
+
+Le seed peut être relancé sans changer le mot de passe d'un compte
+existant. Les pages et API sous `/owner` sont réservées aux sessions dont
+`isPlatformOwner` vaut `true`. Sur Next.js 16, les contrôles de routage
+utilisent le fichier `src/proxy.js` (la convention `middleware.js` est
+dépréciée).

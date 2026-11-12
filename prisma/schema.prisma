@@ -1,6 +1,5 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -12,17 +11,18 @@ datasource db {
 // All models follow the agreed fields, table names are snake_case, Prisma will auto-map
 
 model User {
-  id               String    @id @default(cuid())
-  name             String
-  email            String?   @unique
-  phone            String?   @unique
-  password         String
-  isPlatformOwner  Boolean   @default(false) @map("is_platform_owner")
-  emailVerifiedAt  DateTime? @map("email_verified_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  name            String
+  email           String?   @unique
+  phone           String?   @unique
+  password        String
+  isPlatformOwner Boolean   @default(false) @map("is_platform_owner")
+  emailVerifiedAt DateTime? @map("email_verified_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  // Relations (to be added later: clinicUser, responsible)
+  clinicUsers ClinicUser[]
+
   @@map("users")
 }
 
@@ -44,8 +44,26 @@ model Clinic {
 
   subscriptions Subscription[]
   payments      Payment[]
+  users         ClinicUser[]
 
   @@map("clinics")
+}
+
+model ClinicUser {
+  clinicId  String   @map("clinic_id")
+  userId    String   @map("user_id")
+  role      String   @default("clinic_admin")
+  isActive  Boolean  @default(true) @map("is_active")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  clinic Clinic @relation(fields: [clinicId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@id([clinicId, userId])
+  @@index([userId])
+  @@map("clinic_users")
 }
 
 model Plan {
@@ -65,40 +83,40 @@ model Plan {
 }
 
 model Subscription {
-  id            String    @id @default(cuid())
-  clinicId      String    @map("clinic_id")
-  planId        String    @map("plan_id")
-  status        String    // 'trialing' | 'active' | 'past_due' | 'cancelled' | 'expired'
-  startsAt      DateTime? @map("starts_at")
-  endsAt        DateTime? @map("ends_at")
-  trialEndsAt   DateTime? @map("trial_ends_at")
-  cancelledAt   DateTime? @map("cancelled_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id          String    @id @default(cuid())
+  clinicId    String    @map("clinic_id")
+  planId      String    @map("plan_id")
+  status      String // 'trialing' | 'active' | 'past_due' | 'cancelled' | 'expired'
+  startsAt    DateTime? @map("starts_at")
+  endsAt      DateTime? @map("ends_at")
+  trialEndsAt DateTime? @map("trial_ends_at")
+  cancelledAt DateTime? @map("cancelled_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  clinic  Clinic   @relation(fields: [clinicId], references: [id])
-  plan    Plan     @relation(fields: [planId], references: [id])
+  clinic   Clinic    @relation(fields: [clinicId], references: [id])
+  plan     Plan      @relation(fields: [planId], references: [id])
   payments Payment[]
 
   @@map("subscriptions")
 }
 
 model Payment {
-  id              String    @id @default(cuid())
-  clinicId        String    @map("clinic_id")
-  subscriptionId  String    @map("subscription_id")
-  amount          Decimal   @db.Decimal(10, 2)
-  currency        String    @default("MAD")
-  status          String    // 'pending' | 'completed' | 'failed' | 'refunded'
-  method          String    // 'cash' | 'bank_transfer' | 'card'
-  reference       String?
-  paidAt          DateTime? @map("paid_at")
-  periodStartsAt  DateTime? @map("period_starts_at")
-  periodEndsAt    DateTime? @map("period_ends_at")
-  recordedBy      String    @map("recorded_by") // Platform Owner User id
-  notes           String?
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id             String    @id @default(cuid())
+  clinicId       String    @map("clinic_id")
+  subscriptionId String    @map("subscription_id")
+  amount         Decimal   @db.Decimal(10, 2)
+  currency       String    @default("MAD")
+  status          String    // 'pending' | 'paid' | 'failed'
+  method         String? // 'cash' | 'bank_transfer' | null while pending
+  reference      String?
+  paidAt         DateTime? @map("paid_at")
+  periodStartsAt DateTime? @map("period_starts_at")
+  periodEndsAt   DateTime? @map("period_ends_at")
+  recordedBy     String    @map("recorded_by") // Platform Owner User id
+  notes          String?   @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
   clinic       Clinic       @relation(fields: [clinicId], references: [id])
   subscription Subscription @relation(fields: [subscriptionId], references: [id])

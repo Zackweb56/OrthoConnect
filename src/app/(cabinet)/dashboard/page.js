@@ -1,27 +1,16 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "../../../../auth";
+import { findFirstClinicSlugForUser } from "@/features/subscriptions/access";
+import { forbidden, redirect } from "next/navigation";
 
-export default function CabinetDashboardPage() {
-  return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <Badge variant="outline">Phase 2</Badge>
-        <h2 className="text-2xl font-semibold">Dashboard</h2>
-        <p className="text-muted">
-          Votre espace de travail — le contenu métier sera ajouté plus tard.
-        </p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Bienvenue dans votre cabinet</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted">
-            Patients, rendez-vous et suivi seront disponibles dans les phases
-            suivantes.
-          </p>
-        </CardContent>
-      </Card>
-    </section>
-  );
+export const instant = false;
+
+export default async function CabinetDashboardPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+  if (session.user.isPlatformOwner) redirect("/owner/dashboard");
+
+  const clinicSlug = await findFirstClinicSlugForUser(session.user.id);
+  if (!clinicSlug) forbidden();
+
+  redirect(`/${encodeURIComponent(clinicSlug)}/dashboard`);
 }
