@@ -87,9 +87,9 @@ export function UsersRolesManagement({ permissions, currentUserId }) {
       .then(([userData, roleData]) => {
         if (!active) return;
         setUsers(userData.users);
-        setUserRoles(userData.roles);
+        setUserRoles(userData.roles.filter((role) => role.name !== "responsable"));
         setUserTotal(userData.total);
-        setRoles(roleData.roles);
+        setRoles(roleData.roles.filter((role) => role.name !== "responsable"));
         setAvailablePermissions(roleData.permissions);
       })
       .catch((requestError) => {
@@ -344,7 +344,11 @@ export function UsersRolesManagement({ permissions, currentUserId }) {
       key: "role",
       label: "Rôle",
       sortable: true,
-      render: (user) => <Badge variant="outline">{roleLabel(user.role)}</Badge>,
+      render: (user) => (
+        <Badge variant="outline">
+          {user.role === "responsable" ? "—" : roleLabel(user.role)}
+        </Badge>
+      ),
     },
     {
       key: "isActive",
@@ -983,8 +987,8 @@ function updateField(setValue, fieldName) {
 function roleLabel(role) {
   const labels = {
     clinic_admin: "Administrateur du cabinet",
-    responsable: "Responsable",
   };
+  if (role === "responsable") return "—";
   return (
     labels[role] ??
     role

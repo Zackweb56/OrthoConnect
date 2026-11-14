@@ -212,6 +212,11 @@ export function ProShell({ nav, title, user, children, permissions = [] }) {
                       {user.email}
                     </span>
                   )}
+                  {user?.role && user.role !== "responsable" && (
+                    <span className="mt-1 block text-xs font-normal">
+                      {userRoleLabel(user.role)}
+                    </span>
+                  )}
                 </DropdownMenuLabel>
                 {user?.clinicId && clinicSlug && (
                   <DropdownMenuItem asChild>
@@ -237,4 +242,12 @@ export function ProShell({ nav, title, user, children, permissions = [] }) {
       <ToastViewport />
     </div>
   );
+}
+
+function userRoleLabel(role) {
+  if (role === "clinic_admin") return "Administrateur du cabinet";
+  return role
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }

@@ -42,6 +42,9 @@ export const PATCH = cabinetRoute(
       }
 
       if (input.role) {
+        if (input.role === "responsable") {
+          throw new ApiError("Sélectionnez un rôle de membre du cabinet.", 422);
+        }
         const role = await findClinicRoleByName(clinicId, input.role, tx);
         if (!role) throw new ApiError("Sélectionnez un rôle valide.", 422);
         if (role.name === "clinic_admin" && input.isActive === false) {

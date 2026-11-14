@@ -44,7 +44,7 @@ export default async function ClinicWorkspaceLayout({ children, params }) {
     <ProShell
       nav={nav}
       title={context.clinic.name}
-      user={session.user}
+      user={{ ...session.user, role: context.role }}
       permissions={permissions}
     >
       {children}

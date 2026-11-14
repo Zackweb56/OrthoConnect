@@ -74,6 +74,7 @@ export const GET = cabinetRoute(
       prisma.role.findMany({
         where: {
           OR: [{ clinicId: null, isSystem: true }, { clinicId, isSystem: false }],
+          name: { not: "responsable" },
         },
         orderBy: [{ isSystem: "desc" }, { name: "asc" }],
         select: { name: true, isSystem: true },
@@ -99,6 +100,9 @@ export const POST = cabinetRoute(
   "users.create",
   async (request, _context, { clinicId }) => {
     const input = await readJson(request, createUserSchema);
+    if (input.role === "responsable") {
+      throw new ApiError("Sélectionnez un rôle de membre du cabinet.", 422);
+    }
     const email = input.email.toLowerCase();
     const password = await bcrypt.hash(input.password, 12);
 

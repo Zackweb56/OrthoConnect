@@ -56,6 +56,7 @@ export async function getClinicAccessContext(userId, clinicSlug, now = new Date(
 
   return {
     clinic,
+    role: membership.role,
     subscription,
     reason,
     isAllowed: isClinicAccessAllowed(clinic, subscription, now),
