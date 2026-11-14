@@ -8,7 +8,7 @@ export async function findFirstClinicSlugForUser(userId) {
       isActive: true,
       clinic: { is: { deletedAt: null } },
     },
-    orderBy: { joinedAt: "asc" },
+    orderBy: [{ joinedAt: "asc" }, { clinicId: "asc" }],
     select: { clinic: { select: { slug: true } } },
   });
 

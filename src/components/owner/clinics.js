@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/shared/data-table";
+import { generateStrongPassword } from "@/components/shared/form-fields";
 import {
   ConfirmDialog,
   ErrorBanner,
@@ -476,35 +477,4 @@ function FormField({ label, name, onChange, required = false, ...props }) {
       <Input id={id} name={name} onChange={onChange} {...props} />
     </div>
   );
-}
-
-function generateStrongPassword() {
-  const groups = [
-    "abcdefghijkmnopqrstuvwxyz",
-    "ABCDEFGHJKLMNPQRSTUVWXYZ",
-    "23456789",
-    "!@#$%^&*()-_=+[]{}",
-  ];
-  const allCharacters = groups.join("");
-  const randomIndex = (length) => {
-    const range = 0x100000000;
-    const limit = Math.floor(range / length) * length;
-    let value;
-    do {
-      value = globalThis.crypto.getRandomValues(new Uint32Array(1))[0];
-    } while (value >= limit);
-    return value % length;
-  };
-  const characters = groups.map((group) => group[randomIndex(group.length)]);
-  while (characters.length < 20) {
-    characters.push(allCharacters[randomIndex(allCharacters.length)]);
-  }
-  for (let index = characters.length - 1; index > 0; index -= 1) {
-    const swapIndex = randomIndex(index + 1);
-    [characters[index], characters[swapIndex]] = [
-      characters[swapIndex],
-      characters[index],
-    ];
-  }
-  return characters.join("");
 }

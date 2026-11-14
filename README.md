@@ -477,8 +477,14 @@ d'une passerelle de paiement marocaine sera une étape séparée après
     serveur.
 -   Les changements sensibles doivent être journalisés.
 
-Le modèle exact des utilisateurs, memberships, rôles et permissions sera
-défini avant la création des migrations.
+Le socle RBAC du MVP est défini dans Prisma : les rôles système
+(`clinic_admin` et `responsable`) sont partagés, tandis que les rôles
+personnalisés sont limités à un cabinet. `responsable` désigne le parent
+ou responsable légal; les permissions sont associées aux rôles par
+`role_permissions`, et chaque membership conserve son identifiant de rôle
+dans `clinic_users.role`. Les API cabinet déduisent le cabinet de la
+session et revérifient l'appartenance active ainsi que la permission
+requise côté serveur.
 
 ------------------------------------------------------------------------
 

@@ -13,7 +13,17 @@ export const cabinetNav = [
   { label: "Clinical Records", href: "/clinical-records", icon: "FolderHeart" },
   { label: "Activities", href: "/activities", icon: "Puzzle" },
   { label: "Home Programs", href: "/home-programs", icon: "House" },
-  { label: "Settings", href: "/settings", icon: "Settings2" },
+  {
+    label: "Users & Roles",
+    href: "/users",
+    icon: "UsersRound",
+    permission: "users.view",
+  },
+  {
+    label: "Settings",
+    href: "/settings",
+    icon: "Settings2",
+  },
 ];
 
 export const familyNav = [

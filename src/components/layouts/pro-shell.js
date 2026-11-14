@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   ChevronDown,
+  CircleUserRound,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
@@ -18,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -26,7 +28,7 @@ import { SignOutItem } from "@/components/layouts/sign-out-item";
 import { ToastViewport } from "@/components/owner/shared";
 import { cn } from "cn";
 
-export function ProShell({ nav, title, user, children }) {
+export function ProShell({ nav, title, user, children, permissions = [] }) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,6 +39,10 @@ export function ProShell({ nav, title, user, children }) {
     .slice(0, 2)
     .map((part) => part[0].toUpperCase())
     .join("");
+  const visibleNav = nav.filter(
+    (item) => !item.permission || permissions.includes(item.permission),
+  );
+  const clinicSlug = pathname.split("/").filter(Boolean)[0];
 
   return (
     <div className={cn(themeClass, "flex min-h-screen bg-canvas text-fg")}>
@@ -108,7 +114,7 @@ export function ProShell({ nav, title, user, children }) {
         <Separator />
         <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto p-3">
           <ul className="space-y-1">
-            {nav.map((item) => {
+            {visibleNav.map((item) => {
               const Icon = getNavigationIcon(item.icon);
               const isActive =
                 pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -207,6 +213,16 @@ export function ProShell({ nav, title, user, children }) {
                     </span>
                   )}
                 </DropdownMenuLabel>
+                {user?.clinicId && clinicSlug && (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href={`/${encodeURIComponent(clinicSlug)}/settings?section=account`}
+                    >
+                      <CircleUserRound aria-hidden="true" />
+                      Mon profil
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <SignOutItem />
               </DropdownMenuContent>
             </DropdownMenu>
