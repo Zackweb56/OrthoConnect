@@ -45,6 +45,7 @@ model Clinic {
   subscriptions Subscription[]
   payments      Payment[]
   users         ClinicUser[]
+  roles         Role[]
 
   @@map("clinics")
 }
@@ -64,6 +65,43 @@ model ClinicUser {
   @@id([clinicId, userId])
   @@index([userId])
   @@map("clinic_users")
+}
+
+model Role {
+  id              String           @id @default(cuid())
+  name            String
+  isSystem        Boolean          @default(false) @map("is_system")
+  clinicId        String?          @map("clinic_id")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  clinic          Clinic?          @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+
+  @@unique([clinicId, name])
+  @@index([clinicId])
+  @@map("roles")
+}
+
+model Permission {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  group           String
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
 }
 
 model Plan {

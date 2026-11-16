@@ -38,17 +38,39 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
         token.isPlatformOwner = user.isPlatformOwner === true;
       }
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub;
         session.user.isPlatformOwner = token.isPlatformOwner === true;
+        const [profile, membership] = await Promise.all([
+          prisma.user.findUnique({
+            where: { id: token.sub },
+            select: { name: true, email: true },
+          }),
+          token.isPlatformOwner
+            ? null
+            : prisma.clinicUser.findFirst({
+                where: {
+                  userId: token.sub,
+                  isActive: true,
+                  clinic: { is: { deletedAt: null } },
+                },
+                orderBy: [{ joinedAt: "asc" }, { clinicId: "asc" }],
+                select: { clinicId: true },
+              }),
+        ]);
+        if (profile) {
+          session.user.name = profile.name;
+          session.user.email = profile.email;
+        }
+        session.user.clinicId = membership?.clinicId ?? null;
       }
       return session;
     },

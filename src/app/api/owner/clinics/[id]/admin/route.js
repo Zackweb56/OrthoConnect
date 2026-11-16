@@ -7,20 +7,12 @@ import {
   ownerRoute,
   readJson,
 } from "@/lib/owner-api";
+import { strongPasswordSchema } from "@/lib/validation";
 
 const adminSchema = z.object({
   name: z.string().trim().min(1, "Le nom est obligatoire.").max(255),
   email: z.string().trim().email("Saisissez une adresse e-mail valide."),
-  password: z
-    .string()
-    .min(12, "Le mot de passe doit contenir au moins 12 caractères.")
-    .refine((password) => Buffer.byteLength(password, "utf8") <= 72, {
-      message: "Le mot de passe ne peut pas dépasser 72 octets.",
-    })
-    .regex(/[a-z]/, "Ajoutez une lettre minuscule.")
-    .regex(/[A-Z]/, "Ajoutez une lettre majuscule.")
-    .regex(/[0-9]/, "Ajoutez un chiffre.")
-    .regex(/[^A-Za-z0-9]/, "Ajoutez un symbole."),
+  password: strongPasswordSchema,
 });
 
 export const POST = ownerRoute(async (request, { params }) => {

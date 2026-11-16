@@ -12,11 +12,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export {
+  FieldError,
   PasswordInput,
   RequiredFieldsNotice,
   RequiredLabel,
 } from "@/components/shared/form-fields";
 export { LoadingState } from "@/components/shared/loading-state";
+
+export class ApiRequestError extends Error {
+  constructor(message, fieldErrors = {}) {
+    super(message);
+    this.name = "ApiRequestError";
+    this.fieldErrors = fieldErrors;
+  }
+}
 
 export async function apiRequest(url, options) {
   let response;
@@ -33,17 +42,64 @@ export async function apiRequest(url, options) {
   }
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const hasFieldErrors = Object.keys(payload.details?.fieldErrors ?? {}).length > 0;
-    throw new Error(
+    const fieldErrors = payload.details?.fieldErrors ?? {};
+    const fieldSummary = Object.entries(fieldErrors)
+      .flatMap(([field, messages]) =>
+        (Array.isArray(messages) ? messages : [messages]).map(
+          (message) => `${validationFieldLabel(field)} : ${message}`,
+        ),
+      )
+      .join(" ");
+    throw new ApiRequestError(
       [
         payload.error ?? `La requête a échoué (${response.status}).`,
-        ...(hasFieldErrors ? ["Vérifiez les champs signalés."] : []),
+        fieldSummary,
+        ...(payload.details?.formErrors ?? []),
       ]
         .filter(Boolean)
         .join(" "),
+      fieldErrors,
     );
   }
   return payload;
+}
+
+function validationFieldLabel(field) {
+  const [baseField, detail] = field.split(".");
+  const labels = {
+    name: "Nom",
+    email: "Adresse e-mail",
+    password: "Mot de passe",
+    currentPassword: "Mot de passe actuel",
+    confirmPassword: "Confirmation du mot de passe",
+    role: "Rôle",
+    permissionIds: "Permissions",
+    phone: "Téléphone",
+    address: "Adresse",
+    city: "Ville",
+    logoPath: "Logo",
+    timezone: "Fuseau horaire",
+    openingHours: "Horaires d’ouverture",
+    isActive: "Statut",
+  };
+  if (baseField === "openingHours" && detail) {
+    const days = {
+      monday: "lundi",
+      tuesday: "mardi",
+      wednesday: "mercredi",
+      thursday: "jeudi",
+      friday: "vendredi",
+      saturday: "samedi",
+      sunday: "dimanche",
+    };
+    return `Horaires d’ouverture (${days[detail] ?? detail})`;
+  }
+  return (
+    labels[field] ??
+    field
+      .replaceAll(".", " ")
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+  );
 }
 
 export function notifyToast(message, type = "success") {

@@ -46,9 +46,67 @@ async function seedPlatformOwner() {
   console.info(`Created Platform Owner ${email}.`);
 }
 
-seedPlatformOwner()
+const permissions = [
+  { name: "users.view", group: "Users" },
+  { name: "users.create", group: "Users" },
+  { name: "users.update", group: "Users" },
+  { name: "users.delete", group: "Users" },
+  { name: "roles.view", group: "Roles" },
+  { name: "roles.manage", group: "Roles" },
+  { name: "clinic.view", group: "Clinic" },
+  { name: "clinic.update", group: "Clinic" },
+];
+
+async function seedClinicRolesAndPermissions() {
+  const permissionsByName = new Map();
+  for (const permission of permissions) {
+    const savedPermission = await prisma.permission.upsert({
+      where: { name: permission.name },
+      update: { group: permission.group },
+      create: permission,
+    });
+    permissionsByName.set(permission.name, savedPermission);
+  }
+
+  const roles = [
+    { name: "clinic_admin", permissions: permissions.map(({ name }) => name) },
+  ];
+
+  for (const roleDefinition of roles) {
+    let role = await prisma.role.findFirst({
+      where: {
+        name: roleDefinition.name,
+        isSystem: true,
+        clinicId: null,
+      },
+    });
+    if (!role) {
+      role = await prisma.role.create({
+        data: {
+          name: roleDefinition.name,
+          isSystem: true,
+          clinicId: null,
+        },
+      });
+    }
+
+    await prisma.rolePermission.deleteMany({ where: { roleId: role.id } });
+    if (roleDefinition.permissions.length) {
+      await prisma.rolePermission.createMany({
+        data: roleDefinition.permissions.map((permissionName) => ({
+          roleId: role.id,
+          permissionId: permissionsByName.get(permissionName).id,
+        })),
+      });
+    }
+  }
+
+  console.info("Clinic roles and permissions are ready.");
+}
+
+Promise.all([seedPlatformOwner(), seedClinicRolesAndPermissions()])
   .catch((error) => {
-    console.error("Platform Owner seed failed:", error);
+    console.error("Database seed failed:", error);
     process.exitCode = 1;
   })
   .finally(async () => {

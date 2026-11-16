@@ -1,5 +1,6 @@
 import { auth } from "../../auth";
 import { z } from "zod";
+import { formatZodError } from "@/lib/validation";
 
 export class ApiError extends Error {
   constructor(message, status = 400, details) {
@@ -28,7 +29,10 @@ export function ownerRoute(handler) {
 
       if (error?.name === "ZodError") {
         return Response.json(
-          { error: "Les informations saisies sont invalides.", details: error.flatten() },
+          {
+            error: "Les informations saisies sont invalides.",
+            details: formatZodError(error),
+          },
           { status: 422 },
         );
       }

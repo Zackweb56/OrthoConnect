@@ -8,7 +8,7 @@ export async function findFirstClinicSlugForUser(userId) {
       isActive: true,
       clinic: { is: { deletedAt: null } },
     },
-    orderBy: { joinedAt: "asc" },
+    orderBy: [{ joinedAt: "asc" }, { clinicId: "asc" }],
     select: { clinic: { select: { slug: true } } },
   });
 
@@ -56,6 +56,7 @@ export async function getClinicAccessContext(userId, clinicSlug, now = new Date(
 
   return {
     clinic,
+    role: membership.role,
     subscription,
     reason,
     isAllowed: isClinicAccessAllowed(clinic, subscription, now),

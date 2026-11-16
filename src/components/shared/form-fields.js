@@ -27,6 +27,24 @@ export function RequiredLabel({ htmlFor, children, required = false }) {
   );
 }
 
+export function FieldError({ id, children }) {
+  if (!children) return null;
+  return (
+    <p id={id} role="alert" className="text-sm text-danger">
+      {children}
+    </p>
+  );
+}
+
+export function getFieldError(fieldErrors, fieldName) {
+  const directError = fieldErrors?.[fieldName];
+  if (directError?.length) return directError[0];
+  const nestedError = Object.entries(fieldErrors ?? {}).find(([name]) =>
+    name.startsWith(`${fieldName}.`),
+  )?.[1];
+  return Array.isArray(nestedError) ? nestedError[0] : nestedError;
+}
+
 export function PasswordInput({
   id,
   value,
@@ -78,4 +96,35 @@ export function PasswordInput({
       </div>
     </div>
   );
+}
+
+export function generateStrongPassword() {
+  const groups = [
+    "abcdefghijkmnopqrstuvwxyz",
+    "ABCDEFGHJKLMNPQRSTUVWXYZ",
+    "23456789",
+    "!@#$%^&*()-_=+[]{}",
+  ];
+  const allCharacters = groups.join("");
+  const randomIndex = (length) => {
+    const range = 0x100000000;
+    const limit = Math.floor(range / length) * length;
+    let value;
+    do {
+      value = globalThis.crypto.getRandomValues(new Uint32Array(1))[0];
+    } while (value >= limit);
+    return value % length;
+  };
+  const characters = groups.map((group) => group[randomIndex(group.length)]);
+  while (characters.length < 20) {
+    characters.push(allCharacters[randomIndex(allCharacters.length)]);
+  }
+  for (let index = characters.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomIndex(index + 1);
+    [characters[index], characters[swapIndex]] = [
+      characters[swapIndex],
+      characters[index],
+    ];
+  }
+  return characters.join("");
 }
