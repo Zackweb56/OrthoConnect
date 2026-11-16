@@ -17,7 +17,7 @@ The current tenant is a `Clinic` row. A `User` is a platform-level account, and 
 
 The actual schema is in [`schema.prisma`](../prisma/schema.prisma). The MySQL migrations are under [`prisma/migrations`](../prisma/migrations), and the Prisma datasource uses `DATABASE_URL`. The application Prisma client is constructed with the TiDB Cloud Prisma adapter in [`prisma.js`](../src/lib/db/prisma.js); the migration lock identifies the provider as MySQL.
 
-The current schema contains clinic, account, membership, role/permission, plan, subscription, and payment models. It does **not** yet contain patient, guardian/family-account, appointment, activity, or clinical-record models. The family-login page currently has a disabled submit button. Accordingly, the `responsable` role is a seeded cabinet role, not a working family identity or patient relationship.
+The current schema contains clinic, account, membership, role/permission, plan, subscription, and payment models. It does **not** yet contain patient, guardian/family-account, appointment, activity, or clinical-record models. The family-login page currently has a disabled submit button. Guardian accounts are not represented by a cabinet staff role.
 
 ## 2. Authentication and choosing a clinic
 
@@ -46,10 +46,10 @@ The main authorization code is in [`permissions.js`](../src/lib/permissions.js);
 - `Permission.name` is global and unique. Permissions are attached to role rows through `RolePermission`.
 - A system role has `isSystem = true` and `clinicId = null`. A custom role has a clinic ID and belongs to that clinic.
 - `ClinicUser.role` is stored as a **string role name**, not as a foreign key to `Role`. Permission resolution first looks for a clinic-specific role with that name and then falls back to a system role.
-- The seed currently creates system roles `clinic_admin` and `responsable`. `clinic_admin` receives every seeded permission; `responsable` receives none. The role-management table omits `responsable`, while membership/user views can still resolve and display the assigned role.
+- The seed creates only the system role `clinic_admin`, which receives every seeded permission. Guardian accounts are not a cabinet role. Memberships left without a valid role have no permissions until an administrator assigns a valid staff role.
 - Custom roles can only be created, assigned, changed, or deleted through permission-checked cabinet APIs. The delete API rejects roles that are still assigned. The main `clinic_admin` membership is protected from user-side demotion, deactivation, and removal.
 
-The role and permission schema and current seed behavior are in [`schema.prisma`](../prisma/schema.prisma) and [`seed.js`](../prisma/seed.js).
+The role and permission schema and current seed behavior are in [`schema.prisma`](../prisma/schema.prisma) and [`seed.js`](../prisma/seed.js). The forward migration [`migration.sql`](../prisma/migrations/20261115013000_remove_legacy_system_role/migration.sql) removes the retired role and leaves affected memberships unassigned.
 
 ## 5. Cabinet-user lifecycle and account profile
 
@@ -70,13 +70,13 @@ These are observations about the current implementation, not changes made by thi
 | Priority | Current behavior | Why it matters / production check |
 | --- | --- | --- |
 | **High** | Workspace pages enforce clinic suspension and subscription access in the layout. `cabinetRoute` checks membership and soft deletion, but does not check `Clinic.isActive` or subscription access. | A direct request to a cabinet API may still read or mutate data while the UI workspace is blocked for suspension or an expired subscription. Before production, test every cabinet API directly for suspended clinics and inactive/expired subscriptions, and decide whether the API boundary must enforce the same policy. |
-| **High** | The seed migrates memberships whose role is `therapist` or `secretary` to `responsable`, and removes obsolete role rows. | Re-running `npm run seed` against a populated database is not merely additive: it changes existing membership role names and can remove clinic role rows. Review the data impact and take a backup before running it against production data. |
+| **High** | Membership roles are stored as strings without a foreign key. | If a role is removed or renamed, memberships can be left without a valid role and consequently without permissions. Review affected memberships and assign valid cabinet roles before deployment; access should fail closed until then. |
 | **High** | `ClinicUser.role` is a free-form string with no database foreign key to a role. | Direct database edits, incomplete migrations, or future role changes can leave memberships referring to missing roles. Permission resolution then returns no role permissions. Test missing/renamed roles and consider operational checks before release. |
 | **Medium** | MySQL permits multiple `NULL` values in a composite unique index, so `@@unique([clinicId, name])` does not guarantee one global row for each system-role name. The seed uses `findFirst` followed by create. | Concurrent or repeated setup processes can produce duplicate global system roles; `findFirst` may then resolve an unexpected row. Check existing data for duplicates and ensure only one seed process runs at a time. |
 | **Medium** | A user's session selects the earliest active membership; there is no active-clinic switcher. | Users with memberships in multiple clinics cannot deliberately switch between them in the current flow. Verify expected behavior for shared accounts and avoid assuming the URL alone changes the active tenant. |
 | **Medium** | `Payment` stores both `clinicId` and `subscriptionId`, each with independent relations. The schema does not enforce that the referenced subscription belongs to the same clinic as the payment. | Current owner handlers normally create matching values, but inconsistent data could be introduced by another writer or a future bug. Test mismatched clinic/subscription data and billing reads before relying on database constraints as tenant isolation. |
 | **Medium** | Account email is global, and profile edits apply to the global account rather than to one clinic membership. | This is consistent with the current schema, but should be made explicit to users managing multiple clinics. Test that changing a profile does not accidentally imply a per-clinic change. |
-| **Product gap** | There are no patient/guardian data models or tenant-scoped patient APIs yet; the family sign-in page is a static screen with a disabled button. | The `responsable` role does not currently implement a parent/guardian portal. Do not treat family users or patient records as tenant-isolated until those models and authorization paths exist and have dedicated tests. |
+| **Product gap** | There are no patient/guardian data models or tenant-scoped patient APIs yet; the family sign-in page is a static screen with a disabled button. | Do not treat family users or patient records as tenant-isolated until those models and authorization paths exist and have dedicated tests. |
 | **Operational security** | Credential sign-in has no rate-limiting or MFA mechanism in the inspected code. Email verification is not required by sign-in. | Validate the deployment's abuse controls and account-recovery policy before using real user accounts. |
 
 ## 7. Suggested pre-production isolation checks

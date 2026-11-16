@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { cabinetRoute } from "@/lib/cabinet-api";
 import { ApiError, lockClinic, readJson } from "@/lib/owner-api";
 
-const reservedRoleNames = ["clinic_admin", "responsable", "therapist", "secretary"];
+const reservedRoleNames = ["clinic_admin", "therapist", "secretary"];
 
 const createRoleSchema = z.object({
   name: z
@@ -25,7 +25,6 @@ export const GET = cabinetRoute(
       prisma.role.findMany({
         where: {
           OR: [{ clinicId: null, isSystem: true }, { clinicId, isSystem: false }],
-          name: { not: "responsable" },
         },
         orderBy: [{ isSystem: "desc" }, { name: "asc" }],
         include: {

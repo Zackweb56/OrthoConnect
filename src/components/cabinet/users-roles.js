@@ -87,9 +87,11 @@ export function UsersRolesManagement({ permissions, currentUserId }) {
       .then(([userData, roleData]) => {
         if (!active) return;
         setUsers(userData.users);
-        setUserRoles(userData.roles.filter((role) => role.name !== "responsable"));
+        setUserRoles(
+          userData.roles.filter((role) => role.name !== "clinic_admin"),
+        );
         setUserTotal(userData.total);
-        setRoles(roleData.roles.filter((role) => role.name !== "responsable"));
+        setRoles(roleData.roles);
         setAvailablePermissions(roleData.permissions);
       })
       .catch((requestError) => {
@@ -346,7 +348,7 @@ export function UsersRolesManagement({ permissions, currentUserId }) {
       sortable: true,
       render: (user) => (
         <Badge variant="outline">
-          {user.role === "responsable" ? "—" : roleLabel(user.role)}
+          {user.role ? roleLabel(user.role) : "Sans rôle attribué"}
         </Badge>
       ),
     },
@@ -765,33 +767,43 @@ export function UsersRolesManagement({ permissions, currentUserId }) {
               </>
             )}
             <div className="space-y-2">
-              <RequiredLabel htmlFor="cabinet-user-role" required>
-                Rôle
-              </RequiredLabel>
-              <select
-                id="cabinet-user-role"
-                required
-                value={userForm.role}
-                disabled={userDialog.user?.role === "clinic_admin"}
-                onChange={updateField(setUserForm, "role")}
-                className="h-11 w-full rounded-lg border border-line bg-surface px-3 text-sm disabled:opacity-60"
-                aria-invalid={Boolean(getFieldError(userFieldErrors, "role"))}
-                aria-describedby={
-                  getFieldError(userFieldErrors, "role")
-                    ? "cabinet-user-role-error"
-                    : undefined
-                }
-              >
-                <option value="">Sélectionner un rôle</option>
-                {userRoles.map((role) => (
-                  <option key={role.name} value={role.name}>
-                    {roleLabel(role.name)}
-                  </option>
-                ))}
-              </select>
-              <FieldError id="cabinet-user-role-error">
-                {getFieldError(userFieldErrors, "role")}
-              </FieldError>
+              {userDialog.user?.role === "clinic_admin" ? (
+                <>
+                  <span className="text-sm font-medium">Rôle</span>
+                  <p className="rounded-lg border border-line bg-surface-soft px-3 py-3 text-sm text-muted">
+                    Administrateur principal du cabinet
+                  </p>
+                </>
+              ) : (
+                <>
+                  <RequiredLabel htmlFor="cabinet-user-role" required>
+                    Rôle
+                  </RequiredLabel>
+                  <select
+                    id="cabinet-user-role"
+                    required
+                    value={userForm.role}
+                    onChange={updateField(setUserForm, "role")}
+                    className="h-11 w-full rounded-lg border border-line bg-surface px-3 text-sm"
+                    aria-invalid={Boolean(getFieldError(userFieldErrors, "role"))}
+                    aria-describedby={
+                      getFieldError(userFieldErrors, "role")
+                        ? "cabinet-user-role-error"
+                        : undefined
+                    }
+                  >
+                    <option value="">Sélectionner un rôle</option>
+                    {userRoles.map((role) => (
+                      <option key={role.name} value={role.name}>
+                        {roleLabel(role.name)}
+                      </option>
+                    ))}
+                  </select>
+                  <FieldError id="cabinet-user-role-error">
+                    {getFieldError(userFieldErrors, "role")}
+                  </FieldError>
+                </>
+              )}
             </div>
             <ErrorBanner message={error} />
             <div className="flex justify-end gap-2">
@@ -988,7 +1000,6 @@ function roleLabel(role) {
   const labels = {
     clinic_admin: "Administrateur du cabinet",
   };
-  if (role === "responsable") return "—";
   return (
     labels[role] ??
     role

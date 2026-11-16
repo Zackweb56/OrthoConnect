@@ -42,7 +42,7 @@ export const PATCH = cabinetRoute(
       }
 
       if (input.role) {
-        if (input.role === "responsable") {
+        if (input.role === "clinic_admin" && membership.role !== "clinic_admin") {
           throw new ApiError("Sélectionnez un rôle de membre du cabinet.", 422);
         }
         const role = await findClinicRoleByName(clinicId, input.role, tx);
@@ -54,21 +54,6 @@ export const PATCH = cabinetRoute(
           );
         }
 
-        if (
-          role.name === "clinic_admin" &&
-          membership.role !== "clinic_admin" &&
-          (await tx.clinicUser.findFirst({
-            where: {
-              clinicId,
-              role: "clinic_admin",
-              isActive: true,
-              userId: { not: userId },
-            },
-            select: { userId: true },
-          }))
-        ) {
-          throw new ApiError("Ce cabinet possède déjà un administrateur actif.", 409);
-        }
         await tx.clinicUser.update({
           where: { clinicId_userId: { clinicId, userId } },
           data: { role: role.name },

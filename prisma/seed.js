@@ -70,7 +70,6 @@ async function seedClinicRolesAndPermissions() {
 
   const roles = [
     { name: "clinic_admin", permissions: permissions.map(({ name }) => name) },
-    { name: "responsable", permissions: [] },
   ];
 
   for (const roleDefinition of roles) {
@@ -100,35 +99,6 @@ async function seedClinicRolesAndPermissions() {
         })),
       });
     }
-  }
-
-  await prisma.clinicUser.updateMany({
-    where: { role: { in: ["therapist", "secretary"] } },
-    data: { role: "responsable" },
-  });
-
-  const allowedSystemRoles = roles.map(({ name }) => name);
-  const obsoleteRoles = await prisma.role.findMany({
-    where: {
-      OR: [
-        { name: { in: ["therapist", "secretary"] } },
-        {
-          isSystem: true,
-          clinicId: null,
-          name: { notIn: allowedSystemRoles },
-        },
-      ],
-    },
-  });
-  for (const role of obsoleteRoles) {
-    await prisma.clinicUser.updateMany({
-      where: {
-        role: role.name,
-        ...(role.clinicId ? { clinicId: role.clinicId } : {}),
-      },
-      data: { role: "responsable" },
-    });
-    await prisma.role.delete({ where: { id: role.id } });
   }
 
   console.info("Clinic roles and permissions are ready.");

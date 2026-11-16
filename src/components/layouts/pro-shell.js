@@ -212,7 +212,7 @@ export function ProShell({ nav, title, user, children, permissions = [] }) {
                       {user.email}
                     </span>
                   )}
-                  {user?.role && user.role !== "responsable" && (
+                  {user?.role && (
                     <span className="mt-1 block text-xs font-normal">
                       {userRoleLabel(user.role)}
                     </span>

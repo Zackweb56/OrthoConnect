@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { cabinetRoute } from "@/lib/cabinet-api";
 import { ApiError, lockClinic, readJson } from "@/lib/owner-api";
 
-const reservedRoleNames = ["clinic_admin", "responsable", "therapist", "secretary"];
+const reservedRoleNames = ["clinic_admin", "therapist", "secretary"];
 
 const roleUpdateSchema = z
   .object({

@@ -74,7 +74,7 @@ export const GET = cabinetRoute(
       prisma.role.findMany({
         where: {
           OR: [{ clinicId: null, isSystem: true }, { clinicId, isSystem: false }],
-          name: { not: "responsable" },
+          name: { not: "clinic_admin" },
         },
         orderBy: [{ isSystem: "desc" }, { name: "asc" }],
         select: { name: true, isSystem: true },
@@ -100,7 +100,7 @@ export const POST = cabinetRoute(
   "users.create",
   async (request, _context, { clinicId }) => {
     const input = await readJson(request, createUserSchema);
-    if (input.role === "responsable") {
+    if (input.role === "clinic_admin") {
       throw new ApiError("Sélectionnez un rôle de membre du cabinet.", 422);
     }
     const email = input.email.toLowerCase();
@@ -113,16 +113,6 @@ export const POST = cabinetRoute(
 
       if (await tx.user.findUnique({ where: { email }, select: { id: true } })) {
         throw new ApiError("Un compte utilise déjà cette adresse e-mail.", 409);
-      }
-
-      if (
-        role.name === "clinic_admin" &&
-        (await tx.clinicUser.findFirst({
-          where: { clinicId, role: "clinic_admin", isActive: true },
-          select: { userId: true },
-        }))
-      ) {
-        throw new ApiError("Ce cabinet possède déjà un administrateur actif.", 409);
       }
 
       const createdUser = await tx.user.create({
